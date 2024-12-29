@@ -1,66 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Resizer</title>
+    <title>Image Resizer Tool</title>
+    
+    <!-- Correct Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Cropper.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css" rel="stylesheet">
+
 </head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
 
-<body class="bg-gradient-to-r from-blue-400 via-pink-500 to-yellow-500 font-sans">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+        <h2 class="text-2xl font-bold mb-4 text-center">Image Resizer Tool</h2>
+        
+        <!-- Image Upload -->
+        <div class="mb-4">
+            <input type="file" id="upload-image" accept="image/*" class="w-full p-2 border border-gray-300 rounded-md">
+        </div>
+        
+        <!-- Image Preview -->
+        <div id="image-preview-container" class="mb-4 hidden">
+            <img id="image-preview" class="max-w-full max-h-96 mx-auto" src="" alt="Image Preview">
+        </div>
 
-    <div class="max-w-4xl mx-auto p-6">
-        <!-- Title -->
-        <h1 class="text-3xl font-bold text-center text-white mb-6">Image Resizer Tool</h1>
+        <!-- Resize Controls -->
+        <div id="resize-controls" class="mb-4 hidden">
+            <label for="width" class="block text-sm font-medium text-gray-700">Width:</label>
+            <input type="number" id="width" class="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder="Enter width">
 
-        <!-- Image Upload Section -->
-        <div class="text-center">
-            <input type="file" id="upload-image" class="mb-4 p-2 border-2 border-gray-300 rounded" />
-            <div id="image-preview" class="hidden mt-4">
-                <img id="preview" class="max-w-full max-h-96 mx-auto" alt="Image Preview" />
-            </div>
+            <label for="height" class="block text-sm font-medium text-gray-700">Height:</label>
+            <input type="number" id="height" class="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder="Enter height">
 
-            <!-- Resize Controls -->
-            <div id="resize-controls" class="hidden mt-6">
-                <input type="number" id="width" placeholder="Width" class="p-2 mb-2 w-1/4 border-2 border-gray-300 rounded" />
-                <input type="number" id="height" placeholder="Height" class="p-2 mb-2 w-1/4 border-2 border-gray-300 rounded" />
-                <button id="resize-btn" class="p-2 bg-blue-500 text-white rounded mt-2">Resize</button>
-            </div>
+            <button id="resize-btn" class="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 mt-2">Resize Image</button>
+        </div>
 
-            <!-- Download Link -->
-            <a id="download-link" href="#" class="hidden mt-4 inline-block p-2 bg-green-500 text-white rounded" download>Download Resized Image</a>
+        <!-- Spinner -->
+        <div id="loading-spinner" class="hidden flex justify-center items-center my-4">
+            <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full border-t-4 border-blue-500"></div>
+        </div>
+
+        <!-- Download Link -->
+        <div id="download-link-container" class="hidden mt-4">
+            <a id="download-link" href="#" class="text-blue-500" download="resized-image.png">Download Resized Image</a>
+        </div>
+        
+        <!-- Crop Button -->
+        <div class="mt-4">
+            <button id="crop-btn" class="w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-700">Crop Image</button>
+        </div>
+    </div>
+
+    <!-- Cropper.js Modal (Hidden initially) -->
+    <div id="cropper-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-8 rounded-lg w-96">
+            <h3 class="text-xl font-bold mb-4 text-center">Crop Your Image</h3>
+            <div id="cropper-container" class="w-full h-64 bg-gray-200 mb-4"></div>
+            <button id="apply-crop" class="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Apply Crop</button>
+            <button id="close-cropper" class="w-full p-2 mt-2 bg-red-500 text-white rounded-md hover:bg-red-700">Close</button>
         </div>
     </div>
 
     <script>
-        document.getElementById('upload-image').addEventListener('change', handleImageUpload);
-        document.getElementById('resize-btn').addEventListener('click', resizeImage);
-
         let uploadedImage = null;
+        let cropper = null;
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
+        // Handle image upload
+        $('#upload-image').on('change', function (e) {
+            const file = e.target.files[0];
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     uploadedImage = new Image();
                     uploadedImage.src = e.target.result;
                     uploadedImage.onload = function () {
-                        document.getElementById('preview').src = uploadedImage.src;
-                        document.getElementById('image-preview').classList.remove('hidden');
-                        document.getElementById('resize-controls').classList.remove('hidden');
+                        $('#image-preview').attr('src', uploadedImage.src);
+                        $('#image-preview-container').removeClass('hidden');
+                        $('#resize-controls').removeClass('hidden');
                     };
                 };
                 reader.readAsDataURL(file);
             }
-        }
+        });
 
-        function resizeImage() {
-            const width = parseInt(document.getElementById('width').value);
-            const height = parseInt(document.getElementById('height').value);
+        // Resize image
+        $('#resize-btn').on('click', function () {
+            const width = parseInt($('#width').val());
+            const height = parseInt($('#height').val());
 
-            if (uploadedImage) {
+            if (uploadedImage && width && height) {
+                $('#loading-spinner').removeClass('hidden');
+
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = width;
@@ -68,12 +105,33 @@
                 ctx.drawImage(uploadedImage, 0, 0, width, height);
 
                 const resizedImageUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.getElementById('download-link');
-                downloadLink.href = resizedImageUrl;
-                downloadLink.classList.remove('hidden');
+                $('#download-link').attr('href', resizedImageUrl).removeClass('hidden');
+                $('#loading-spinner').addClass('hidden');
             }
-        }
+        });
+
+        // Crop functionality
+        $('#crop-btn').on('click', function () {
+            $('#cropper-modal').removeClass('hidden');
+            $('#cropper-container').html('<img src="' + uploadedImage.src + '" />');
+            cropper = new Cropper($('#cropper-container img')[0], {
+                aspectRatio: 16 / 9,
+                viewMode: 1,
+            });
+        });
+
+        // Apply crop
+        $('#apply-crop').on('click', function () {
+            const canvas = cropper.getCroppedCanvas();
+            const croppedImageUrl = canvas.toDataURL('image/png');
+            $('#download-link').attr('href', croppedImageUrl).removeClass('hidden');
+            $('#cropper-modal').addClass('hidden');
+        });
+
+        // Close crop modal
+        $('#close-cropper').on('click', function () {
+            $('#cropper-modal').addClass('hidden');
+        });
     </script>
 </body>
-
 </html>
