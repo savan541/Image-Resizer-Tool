@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Resizer Tool</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <h1 class="text-3xl font-bold text-center mb-6">Image Resizer</h1>
+    
+    <!-- Upload Section -->
+    <div class="mb-6">
+      <input type="file" id="upload-image" accept="image/*" class="block w-full p-2 border border-gray-300 rounded-md mb-4" />
+      <p class="text-center text-gray-500">Choose an image to resize</p>
+    </div>
+    
+    <!-- Image Preview Section -->
+    <div id="image-preview" class="hidden mb-6">
+      <img id="preview" class="w-full h-auto border border-gray-300 rounded-md mb-4" />
+    </div>
+    
+    <!-- Resize Controls Section -->
+    <div id="resize-controls" class="hidden mb-6">
+      <label for="width" class="block text-sm font-medium text-gray-700">Width:</label>
+      <input type="number" id="width" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="Enter width" />
+      
+      <label for="height" class="block text-sm font-medium text-gray-700">Height:</label>
+      <input type="number" id="height" class="w-full p-2 border border-gray-300 rounded-md mb-4" placeholder="Enter height" />
+      
+      <button id="resize-btn" class="w-full bg-blue-500 text-white p-2 rounded-md">Resize Image</button>
+    </div>
+    
+    <!-- Download Section -->
+    <div id="download-section" class="hidden">
+      <a id="download-link" href="#" class="w-full text-center text-white bg-green-500 p-2 rounded-md">Download Resized Image</a>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
