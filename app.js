@@ -1,5 +1,6 @@
 document.getElementById('upload-image').addEventListener('change', handleImageUpload);
 document.getElementById('resize-btn').addEventListener('click', resizeImage);
+console.log(document.getElementById('resize-btn'))
 
 let uploadedImage = null;
 
@@ -21,6 +22,7 @@ function handleImageUpload(event) {
 }
 
 function resizeImage() {
+  console.log(12131)
   const width = parseInt(document.getElementById('width').value);
   const height = parseInt(document.getElementById('height').value);
 
